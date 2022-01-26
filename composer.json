@@ -9,10 +9,21 @@
             "email": "devsellio@gmail.com"
         }
     ],
-    "minimum-stability": "RC",
+    "autoload": {
+        "psr-4": {
+            "O21\\CryptoWallets\\": ""
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "illuminate/support": "^8.80",
         "guzzlehttp/guzzle": "^7.4",
-        "jaggedsoft/php-binance-api": "^0.5.28"
+        "jaggedsoft/php-binance-api": "^0.5.28",
+        "021/support": "^1.0",
+        "denpa/php-bitcoinrpc": "^2.1"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^5.4"
     }
 }
