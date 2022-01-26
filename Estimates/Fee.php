@@ -39,7 +39,15 @@ class Fee
      */
     public function getValuePerByte(): float
     {
-        return ($this->valuePerKb / 1000) * 100000000;
+        return ($this->valuePerKb / 1000);
+    }
+
+    /**
+     * @return float
+     */
+    public function getValuePerByteInSatoshi(): float
+    {
+        return $this->getValuePerByte() * 100000000;
     }
 
     /**
