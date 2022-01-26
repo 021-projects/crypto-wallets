@@ -8,22 +8,22 @@ class Fee
 
     protected int $blocks;
 
-    protected int $approximateTimeInSeconds;
+    protected int $approximateTimeInMinutes;
 
     /**
      *
      * @param  float  $valuePerKb
      * @param  int  $blocks
-     * @param  int|null  $approximateTimeInSeconds
+     * @param  int|null  $approximateTimeInMinutes
      */
     public function __construct(
         float $valuePerKb,
         int $blocks,
-        ?int $approximateTimeInSeconds = null
+        ?int $approximateTimeInMinutes = null
     ) {
         $this->valuePerKb = $valuePerKb;
         $this->blocks = $blocks;
-        $this->approximateTimeInSeconds = $approximateTimeInSeconds ?: $blocks * 10;
+        $this->approximateTimeInMinutes = $approximateTimeInMinutes ?: $blocks * 10;
     }
 
     /**
@@ -53,9 +53,9 @@ class Fee
     /**
      * @return int
      */
-    public function getApproximateTimeInSeconds(): int
+    public function getApproximateTimeInMinutes(): int
     {
-        return $this->approximateTimeInSeconds;
+        return $this->approximateTimeInMinutes;
     }
 
     /**
