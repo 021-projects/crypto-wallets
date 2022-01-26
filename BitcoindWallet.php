@@ -117,7 +117,7 @@ abstract class BitcoindWallet extends Wallet
         float $amount,
         float $fee,
         &$error = null
-    ): bool {
+    ) {
         $client = $this->client;
 
         $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $fee, $error);
@@ -127,9 +127,7 @@ abstract class BitcoindWallet extends Wallet
 
             $signedRawTransaction = $client->signRawTransactionWithWallet($rawTransaction)->result()['hex'];
 
-            $client->sendRawTransaction($signedRawTransaction);
-
-            return true;
+            return $client->sendRawTransaction($signedRawTransaction)->result();
         }
 
         return false;

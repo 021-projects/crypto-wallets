@@ -58,9 +58,9 @@ interface CryptoWallet
      * @param  float  $amount
      * @param  float  $fee
      * @param  string|null  $error
-     * @return bool
+     * @return string|bool ID of new transaction
      */
-    public function sendToAddress($addresses, float $amount, float $fee, ?string &$error = null): bool;
+    public function sendToAddress($addresses, float $amount, float $fee, ?string &$error = null);
 
     public function getTransaction(string $txid): Transaction;
 
