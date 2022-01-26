@@ -17,6 +17,8 @@ or
 ### Connect to wallet 
 
 ```
+use O21\CryptoWallets\Configs\BitcoindConfig;
+
 $wallet = new BitcoinWallet(BitcoindConfig::fill(
     'username',
     'password',
