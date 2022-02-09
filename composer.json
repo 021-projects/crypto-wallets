@@ -17,14 +17,20 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.1",
+        "php": "^8.0",
         "illuminate/support": "^8.80",
         "guzzlehttp/guzzle": "^7.4",
         "jaggedsoft/php-binance-api": "^0.5.28",
         "021/support": "^1.0",
-        "denpa/php-bitcoinrpc": "^2.1"
+        "denpa/php-bitcoinrpc": "^v3.x-dev#5b2aa5"
     },
     "require-dev": {
         "symfony/var-dumper": "^5.4"
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:021-projects/php-bitcoinrpc.git"
+        }
+    ]
 }
