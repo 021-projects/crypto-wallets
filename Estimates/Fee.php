@@ -2,7 +2,9 @@
 
 namespace O21\CryptoWallets\Estimates;
 
-class Fee
+use Illuminate\Contracts\Support\Arrayable;
+
+class Fee implements Arrayable
 {
     protected float $valuePerKb;
 
@@ -24,6 +26,17 @@ class Fee
         $this->valuePerKb = $valuePerKb;
         $this->blocks = $blocks;
         $this->approximateTimeInMinutes = $approximateTimeInMinutes ?: $blocks * 10;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'blocks' => $this->blocks,
+            'value_per_kbyte' => $this->valuePerKb,
+            'value_per_byte' => $this->getValuePerByte(),
+            'value_per_byte_in_satoshi' => $this->getValuePerByte(),
+            'approximate_time_in_minutes' => $this->approximateTimeInMinutes,
+        ];
     }
 
     /**
