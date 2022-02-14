@@ -100,10 +100,10 @@ abstract class BitcoindWallet extends Wallet
     public function calcAmountIncludingFee(
         $addresses,
         float $amount,
-        float $fee,
+        float $feeRatePerKb,
         string &$error = null
     ): float {
-        $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $fee, $error);
+        $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $feeRatePerKb, $error);
 
         if (! empty($transaction)) {
             return $amount + $transaction['fee'];
@@ -115,12 +115,12 @@ abstract class BitcoindWallet extends Wallet
     public function sendToAddress(
         $addresses,
         float $amount,
-        float $fee,
+        float $feeRatePerKb,
         &$error = null
     ) {
         $client = $this->client;
 
-        $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $fee, $error);
+        $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $feeRatePerKb, $error);
 
         if (! empty($transaction)) {
             $rawTransaction = $transaction['hex'];
@@ -136,7 +136,7 @@ abstract class BitcoindWallet extends Wallet
     public function createAndFundTransaction(
         array $addresses,
         float $amount,
-        float $fee,
+        float $feeRatePerKb,
         &$error = null
     ): array {
         $client = $this->client;
@@ -150,7 +150,7 @@ abstract class BitcoindWallet extends Wallet
             )->result();
 
             $transaction = $client->fundRawTransaction($rawTransaction, [
-                'feeRate' => crypto_number($fee)
+                'feeRate' => crypto_number($feeRatePerKb)
             ])->result();
         } catch (\Exception $e) {
             $error = $e->getMessage();

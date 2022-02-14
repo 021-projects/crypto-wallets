@@ -16,7 +16,7 @@ interface CryptoWallet
     /**
      * Returns exchange rate.
      *
-     * @param  string|null  $currency
+     * @param  string  $currency
      * @param  string|null  $source
      * @return float
      */
@@ -25,7 +25,7 @@ interface CryptoWallet
     /**
      * Returns best exchange rate based on history.
      *
-     * @param  string|null  $currency
+     * @param  string  $currency
      * @param  int  $limit
      * @param  int  $interval
      * @return float
@@ -47,20 +47,30 @@ interface CryptoWallet
     /**
      * @param array|string $addresses
      * @param  float  $amount
-     * @param  float  $fee
+     * @param  float  $feeRatePerKb
      * @param  string|null  $error
      * @return float
      */
-    public function calcAmountIncludingFee($addresses, float $amount, float $fee, ?string &$error = null): float;
+    public function calcAmountIncludingFee(
+        $addresses,
+        float $amount,
+        float $feeRatePerKb,
+        ?string &$error = null
+    ): float;
 
     /**
      * @param  array|string  $addresses
      * @param  float  $amount
-     * @param  float  $fee
+     * @param  float  $feeRatePerKb
      * @param  string|null  $error
      * @return string|bool ID of new transaction
      */
-    public function sendToAddress($addresses, float $amount, float $fee, ?string &$error = null);
+    public function sendToAddress(
+        $addresses,
+        float $amount,
+        float $feeRatePerKb,
+        ?string &$error = null
+    );
 
     public function getTransaction(string $txid): Transaction;
 
