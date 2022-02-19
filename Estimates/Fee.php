@@ -51,7 +51,7 @@ class Fee implements Arrayable
 
     public function getValuePerByteInSatoshi(): string
     {
-        return bcmul($this->getValuePerByte(), '100000000');
+        return bcmul($this->getValuePerByte(), '100000000', 8);
     }
 
     /**
