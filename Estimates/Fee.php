@@ -34,7 +34,7 @@ class Fee implements Arrayable
             'blocks' => $this->blocks,
             'value_per_kbyte' => $this->valuePerKb,
             'value_per_byte' => $this->getValuePerByte(),
-            'value_per_byte_in_satoshi' => $this->getValuePerByte(),
+            'value_per_byte_in_satoshi' => $this->getValuePerByteInSatoshi(),
             'approximate_time_in_minutes' => $this->approximateTimeInMinutes,
         ];
     }
