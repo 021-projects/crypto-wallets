@@ -9,7 +9,7 @@ interface CryptoWallet
 {
     public function __construct(array $config, string $walletName = '');
 
-    public function getBalance(): float;
+    public function getBalance(): string;
 
     public function getTransactionsCount(): int;
 
@@ -45,32 +45,32 @@ interface CryptoWallet
     public function getExploreAddressLink(string $address): string;
 
     /**
-     * @param array|string $addresses
-     * @param  float  $amount
-     * @param  float  $feeRatePerKb
+     * @param  array|string  $addresses
+     * @param  string  $feeRatePerKb
+     * @param  string|null  $amount
      * @param  string|null  $error
      * @return float
      */
     public function calcAmountIncludingFee(
-        $addresses,
-        float $amount,
-        float $feeRatePerKb,
+        array|string $addresses,
+        string $feeRatePerKb,
+        ?string $amount,
         ?string &$error = null
     ): float;
 
     /**
      * @param  array|string  $addresses
-     * @param  float  $amount
-     * @param  float  $feeRatePerKb
+     * @param  string  $feeRatePerKb
+     * @param  string|null  $amount
      * @param  string|null  $error
      * @return string|bool ID of new transaction
      */
     public function sendToAddress(
-        $addresses,
-        float $amount,
-        float $feeRatePerKb,
+        array|string $addresses,
+        string $feeRatePerKb,
+        ?string $amount,
         ?string &$error = null
-    );
+    ): bool|string;
 
     public function getTransaction(string $txid): Transaction;
 
@@ -79,12 +79,13 @@ interface CryptoWallet
     public function getExploreTransactionLink(string $txid): string;
 
     /**
-     * @return \Illuminate\Support\Collection|\O21\CryptoWallets\Estimates\Fee[]
+     * @return \Illuminate\Support\Collection<\O21\CryptoWallets\Estimates\Fee>
      */
     public function getEstimateFees(): Collection;
 
     /**
-     * @return \Illuminate\Support\Collection|\O21\CryptoWallets\Transaction[]
+     * @param  string  $block
+     * @return \Illuminate\Support\Collection<\O21\CryptoWallets\Transaction>
      */
     public function getTransactionsSinceBlock(string $block = ''): Collection;
 

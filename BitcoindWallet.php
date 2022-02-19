@@ -6,6 +6,7 @@ use O21\CryptoWallets\Contracts\WalletRate;
 use Denpa\Bitcoin\Client;
 use Illuminate\Support\Collection;
 use O21\CryptoWallets\Estimates\Fee;
+use O21\CryptoWallets\Exceptions\AddressOutputException;
 
 abstract class BitcoindWallet extends Wallet
 {
@@ -35,7 +36,7 @@ abstract class BitcoindWallet extends Wallet
     abstract protected function getWalletRate(?string $source): WalletRate;
 
     /**
-     * @return \Illuminate\Support\Collection|\O21\CryptoWallets\Estimates\Fee[]
+     * @return \Illuminate\Support\Collection<Fee>
      */
     abstract protected function getDefaultFees(): Collection;
     
@@ -49,9 +50,9 @@ abstract class BitcoindWallet extends Wallet
         }
     }
 
-    public function getBalance(): float
+    public function getBalance(): string
     {
-        return (float)$this->client
+        return $this->client
             ->getBalance()
             ->result();
     }
@@ -98,29 +99,29 @@ abstract class BitcoindWallet extends Wallet
     }
 
     public function calcAmountIncludingFee(
-        $addresses,
-        float $amount,
-        float $feeRatePerKb,
-        string &$error = null
+        array|string $addresses,
+        string $feeRatePerKb,
+        ?string $amount,
+        ?string &$error = null
     ): float {
-        $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $feeRatePerKb, $error);
+        $transaction = $this->createAndFundTransaction($addresses, $feeRatePerKb, $amount, $error);
 
         if (! empty($transaction)) {
-            return $amount + $transaction['fee'];
+            return bcadd($amount, $transaction['fee'], 8);
         }
 
         return $amount;
     }
 
     public function sendToAddress(
-        $addresses,
-        float $amount,
-        float $feeRatePerKb,
-        &$error = null
-    ) {
+        array|string $addresses,
+        string $feeRatePerKb,
+        ?string $amount,
+        ?string &$error = null
+    ): bool|string {
         $client = $this->client;
 
-        $transaction = $this->createAndFundTransaction((array)$addresses, $amount, $feeRatePerKb, $error);
+        $transaction = $this->createAndFundTransaction($addresses, $feeRatePerKb, $amount, $error);
 
         if (! empty($transaction)) {
             $rawTransaction = $transaction['hex'];
@@ -134,10 +135,10 @@ abstract class BitcoindWallet extends Wallet
     }
 
     public function createAndFundTransaction(
-        array $addresses,
-        float $amount,
-        float $feeRatePerKb,
-        &$error = null
+        array|string $addresses,
+        string $feeRatePerKb,
+        ?string $amount,
+        ?string &$error = null
     ): array {
         $client = $this->client;
 
@@ -150,7 +151,7 @@ abstract class BitcoindWallet extends Wallet
             )->result();
 
             $transaction = $client->fundRawTransaction($rawTransaction, [
-                'feeRate' => crypto_number($feeRatePerKb)
+                'feeRate' => $feeRatePerKb
             ])->result();
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -159,31 +160,24 @@ abstract class BitcoindWallet extends Wallet
         return $transaction;
     }
 
-    protected function getOutputsForAddresses(array $addresses, float $amount): array
+    /**
+     * @throws \O21\CryptoWallets\Exceptions\AddressOutputException
+     */
+    protected function getOutputsForAddresses(array|string $addresses, ?string $amount): array
     {
         $outputs = [];
 
-        if (count($addresses) > 1) {
-            $amountPerAddress = $this->calculateAmountPerAddress($amount, count($addresses));
-
-            foreach ($addresses as $address) {
-                $outputs[$address] = crypto_number($amountPerAddress);
-            }
+        if (is_array($addresses)) {
+            $outputs = array_map('crypto_number', $addresses);
         } else {
-            $outputs[first($addresses)] = $amount;
+            if (! $amount) {
+                throw AddressOutputException::invalidAmount();
+            }
+
+            $outputs[$addresses] = $amount;
         }
 
         return $outputs;
-    }
-
-    protected function calculateAmountPerAddress(float $amount, int $addressesCount): float
-    {
-        $dividedAmount = $amount / $addressesCount;
-        $roundedAmount = round($dividedAmount, 8);
-
-        return $roundedAmount * $addressesCount > $amount
-            ? round($dividedAmount, 8, PHP_ROUND_HALF_DOWN)
-            : $roundedAmount;
     }
 
     public function getTransaction(string $txid): Transaction
@@ -218,7 +212,7 @@ abstract class BitcoindWallet extends Wallet
             ));
         }
 
-        if ($fees->sum(fn(Fee $fee) => $fee->getValuePerKb()) <= 0) {
+        if (! bccomp($this->sumFees($fees), 0, 8)) {
             $fees = $this->getDefaultFees();
         }
 
@@ -228,6 +222,17 @@ abstract class BitcoindWallet extends Wallet
     protected function estimateSmartFee(int $blocks)
     {
         return data_get($this->client->estimateSmartFee($blocks)->result(), 'feerate', 0);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<Fee>  $fees
+     * @return string
+     */
+    protected function sumFees(Collection $fees): string
+    {
+        return $fees->reduce(function ($result, Fee $fee) {
+            return bcadd($result, $fee->getValuePerKb(), 8);
+        }, 0);
     }
 
     /**

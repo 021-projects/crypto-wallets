@@ -6,7 +6,7 @@ use Illuminate\Contracts\Support\Arrayable;
 
 class Fee implements Arrayable
 {
-    protected float $valuePerKb;
+    protected string $valuePerKb;
 
     protected int $blocks;
 
@@ -14,16 +14,16 @@ class Fee implements Arrayable
 
     /**
      *
-     * @param  float  $valuePerKb
+     * @param  string|float  $valuePerKb
      * @param  int  $blocks
      * @param  int|null  $approximateTimeInMinutes
      */
     public function __construct(
-        float $valuePerKb,
+        string|float $valuePerKb,
         int $blocks,
         ?int $approximateTimeInMinutes = null
     ) {
-        $this->valuePerKb = $valuePerKb;
+        $this->valuePerKb = crypto_number($valuePerKb);
         $this->blocks = $blocks;
         $this->approximateTimeInMinutes = $approximateTimeInMinutes ?: $blocks * 10;
     }
@@ -39,28 +39,19 @@ class Fee implements Arrayable
         ];
     }
 
-    /**
-     * @return float
-     */
-    public function getValuePerKb(): float
+    public function getValuePerKb(): string
     {
         return $this->valuePerKb;
     }
 
-    /**
-     * @return float
-     */
-    public function getValuePerByte(): float
+    public function getValuePerByte(): string
     {
-        return ($this->valuePerKb / 1000);
+        return bcdiv($this->valuePerKb, 1000, 8);
     }
 
-    /**
-     * @return float
-     */
-    public function getValuePerByteInSatoshi(): float
+    public function getValuePerByteInSatoshi(): string
     {
-        return $this->getValuePerByte() * 100000000;
+        return bcmul($this->getValuePerByte(), '100000000');
     }
 
     /**
