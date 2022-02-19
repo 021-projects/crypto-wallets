@@ -2,3 +2,4 @@
 /.idea
 .phpstorm.meta.php
 .DS_STORE
+composer.lock
