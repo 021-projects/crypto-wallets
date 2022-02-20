@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "O21\\CryptoWallets\\": ""
+            "O21\\CryptoWallets\\": "src"
         }
     },
     "minimum-stability": "dev",
