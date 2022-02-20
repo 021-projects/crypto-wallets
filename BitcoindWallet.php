@@ -107,7 +107,7 @@ abstract class BitcoindWallet extends Wallet
         $transaction = $this->createAndFundTransaction($addresses, $feeRatePerKb, $amount, $error);
 
         if (! empty($transaction)) {
-            return bcadd($amount, $transaction['fee'], 8);
+            return bcadd($amount, crypto_number($transaction['fee']), 8);
         }
 
         return $amount;
