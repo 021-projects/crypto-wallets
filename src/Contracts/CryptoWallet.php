@@ -42,6 +42,8 @@ interface CryptoWallet
 
     public function validateAddress(string $address): bool;
 
+    public function isOwningAddress(string $address): bool;
+
     public function getExploreAddressLink(string $address): string;
 
     /**

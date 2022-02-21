@@ -98,6 +98,11 @@ abstract class BitcoindWallet extends Wallet
         return (bool)$this->client->validateAddress($address)->toArray()['isvalid'];
     }
 
+    public function isOwningAddress(string $address): bool
+    {
+        return (bool)($this->client->getAddressInfo($address)->toArray()['ismine'] ?? false);
+    }
+
     public function calcAmountIncludingFee(
         array|string $addresses,
         string $feeRatePerKb,
