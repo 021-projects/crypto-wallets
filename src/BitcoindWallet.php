@@ -103,7 +103,7 @@ abstract class BitcoindWallet extends Wallet
         string $feeRatePerKb,
         ?string $amount,
         ?string &$error = null
-    ): float {
+    ): string {
         $transaction = $this->createAndFundTransaction($addresses, $feeRatePerKb, $amount, $error);
 
         if (! empty($transaction)) {

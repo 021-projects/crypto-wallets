@@ -49,14 +49,14 @@ interface CryptoWallet
      * @param  string  $feeRatePerKb
      * @param  string|null  $amount
      * @param  string|null  $error
-     * @return float
+     * @return string
      */
     public function calcAmountIncludingFee(
         array|string $addresses,
         string $feeRatePerKb,
         ?string $amount,
         ?string &$error = null
-    ): float;
+    ): string;
 
     /**
      * @param  array|string  $addresses
