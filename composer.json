@@ -18,7 +18,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.0",
-        "illuminate/support": "^8.80",
+        "illuminate/support": "^8.80|^9.0",
         "guzzlehttp/guzzle": "^7.4",
         "jaggedsoft/php-binance-api": "^0.5.28",
         "021/support": "^1.0",
