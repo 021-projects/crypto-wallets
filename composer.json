@@ -22,7 +22,7 @@
         "guzzlehttp/guzzle": "^7.4",
         "jaggedsoft/php-binance-api": "^0.5.28",
         "021/support": "^1.0",
-        "denpa/php-bitcoinrpc": "^v3.x-dev#5b2aa5",
+        "denpa/php-bitcoinrpc": "^v3.0.0",
         "ext-bcmath": "*"
     },
     "require-dev": {
