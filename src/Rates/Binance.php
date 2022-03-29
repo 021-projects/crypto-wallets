@@ -65,7 +65,7 @@ class Binance extends AbstractRate
 
     protected function averagePrice(string $symbol)
     {
-        return \GuzzleHttp\json_decode(
+        return Utils::jsonDecode(
             $this->client->get(self::API_V3_URL.'avgPrice', [
                 'timeout' => 3, // Response timeout
                 'connect_timeout' => 3, // Connection timeout,
