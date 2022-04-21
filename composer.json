@@ -12,26 +12,43 @@
     "autoload": {
         "psr-4": {
             "O21\\CryptoWallets\\": "src"
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
         }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "illuminate/support": "^8.80|^9.0",
         "guzzlehttp/guzzle": "^7.4",
         "jaggedsoft/php-binance-api": "^0.5.28",
-        "021/support": "^1.0",
+        "021/support": "^2.0",
         "denpa/php-bitcoinrpc": "^v3.0.0",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "web3p/web3.php": "0.1.6",
+        "021/ethereum-oracles": "^1.0"
     },
     "require-dev": {
-        "symfony/var-dumper": "^5.4"
+        "symfony/var-dumper": "^5.4",
+        "phpunit/phpunit": "^9.5",
+        "vlucas/phpdotenv": "^5.4"
     },
     "repositories": [
         {
             "type": "vcs",
             "url": "git@github.com:021-projects/php-bitcoinrpc.git"
         }
-    ]
+    ],
+    "scripts": {
+        "test": [
+            "vendor/bin/phpunit tests"
+        ]
+    }
 }
