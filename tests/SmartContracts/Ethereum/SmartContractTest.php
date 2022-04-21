@@ -2,6 +2,7 @@
 
 namespace Tests\SmartContracts\Ethereum;
 
+use O21\CryptoWallets\Models\EthereumCall;
 use O21\CryptoWallets\Models\EthereumTransactionReceipt;
 use O21\CryptoWallets\SmartContracts\Ethereum\DeployParams;
 use Tests\Concerns\EthereumWalletTrait;
@@ -29,7 +30,7 @@ class SmartContractTest extends TestCase
         $smartContract = $client->getSmartContract(TestContract::class);
 
         $receipt = $smartContract->deploy(
-            new DeployParams($client->getCoinbase()),
+            new DeployParams(new EthereumCall($client->getCoinbase())),
             $error
         );
 

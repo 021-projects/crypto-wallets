@@ -9,27 +9,21 @@ use PHPUnit\Framework\TestCase;
 
 class DeployParamsTest extends TestCase
 {
-    public function testSet(): void
-    {
-        $params = new DeployParams('0xfbc40d58581d88d194d3dc19b6ddebe65ea05fea');
-        $params->set('foo', 'bar');
-        $params->set([
-            'whiskey' => 'cola'
-        ]);
-
-        $this->assertEquals([
-            'from' => '0xfbc40d58581d88d194d3dc19b6ddebe65ea05fea',
-            'foo' => 'bar',
-            'whiskey' => 'cola'
-        ], $params->toArray());
-    }
-
-    public function testCall(): void
+    public function testToArrayStructure(): void
     {
         $call = new EthereumCall(
+            from: '0xfbc40d58581d88d194d3dc19b6ddebe65ea05fea',
             maxPriorityFeePerGas: Ethereum::Gwei->toWei(21)
         );
 
-        $params = new DeployParams('0xfbc40d58581d88d194d3dc19b6ddebe65ea05fea');
+        $params = new DeployParams($call, ['something']);
+
+        $this->assertEquals([
+            'something',
+            [
+                'from' => '0xfbc40d58581d88d194d3dc19b6ddebe65ea05fea',
+                'maxPriorityFeePerGas' => '0x4e3b29200'
+            ]
+        ], $params->toArray());
     }
 }

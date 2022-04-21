@@ -18,9 +18,10 @@ $wallet = new EthereumWallet(
 
 $contract = $wallet->getSmartContract(TestContract::class);
 $call = new EthereumCall(
+    from: $wallet->getCoinbase(),
     maxPriorityFeePerGas: Ethereum::Gwei->toWei(21)
 );
-$contract->deploy(new DeployParams($wallet->getCoinbase(), $call));
+$contract->deploy(new DeployParams($call));
 
 // Contract address after deploying
 $address = $contract->getAddress();

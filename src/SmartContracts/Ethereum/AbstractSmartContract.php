@@ -42,21 +42,23 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
         $receipt = null;
 
-        $this->contract
-            ->new($params->toArray(), function ($err, $hash) use (&$receipt, &$error) {
-                if ($err && ! $hash) {
-                    $error = $err->getMessage();
-                    return;
-                }
+        $deployParams = $params->toArray();
+        $deployParams[] = function ($err, $hash) use (&$receipt, &$error) {
+            if ($err && ! $hash) {
+                $error = $err->getMessage();
+                return;
+            }
 
-                $receipt = $this->wallet->getTransactionReceipt($hash);
-                if (! $receipt) {
-                    $error = "Can't get transaction receipt for created contract.";
-                    return;
-                }
+            $receipt = $this->wallet->getTransactionReceipt($hash);
+            if (! $receipt) {
+                $error = "Can't get transaction receipt for created contract.";
+                return;
+            }
 
-                $this->setAddress($receipt->contractAddress);
-            });
+            $this->setAddress($receipt->contractAddress);
+        };
+
+        $this->contract->new(...$deployParams);
 
         return $receipt;
     }
