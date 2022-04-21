@@ -1,24 +1,26 @@
 <?php
 
-namespace O21\CryptoWallets\Rates;
+namespace O21\CryptoWallets\RateProviders;
 
 use GuzzleHttp\Utils;
-use O21\CryptoWallets\Rates\Concerns\HasApi;
+use Illuminate\Support\Arr;
+use O21\CryptoWallets\RateProviders\Concerns\HasApiTrait;
 use Binance\API;
+use O21\CryptoWallets\Units\RateInterval;
 
-class Binance extends AbstractRate
+class BinanceProvider extends AbstractRateProvider
 {
-    use HasApi {
-        __construct as apiConstruct;
+    use HasApiTrait {
+        __construct as bindGuzzle;
     }
 
-    const API_V3_URL = 'https://api.binance.com/api/v3/';
+    private const API_V3_URL = 'https://api.binance.com/api/v3/';
 
     protected API $api;
 
     public function __construct()
     {
-        $this->apiConstruct();
+        $this->bindGuzzle();
         $this->api = new API(null, null);
     }
 
@@ -29,21 +31,20 @@ class Binance extends AbstractRate
 
     public function getRate(string $toSymbol, string $fromSymbol = ''): float
     {
-        return (float)$this->safeLoad(
-            fn() => $this->averagePrice($this->defineSymbol($fromSymbol, $toSymbol))['price']
-        );
+        $response = $this->averagePrice($this->getQuerySymbol($fromSymbol, $toSymbol));
+        return (float)Arr::get($response, 'price', 0);
     }
 
     public function history(
         string $toSymbol,
         string $fromSymbol = '',
-        int $limit = 100,
-        int $interval = self::INTERVAL_HOURS
+        int $limit = 60,
+        RateInterval $interval = RateInterval::Minutes
     ): array {
-        $symbol = $this->defineSymbol($fromSymbol, $toSymbol);
-        $apiInterval = $this->defineInterval($interval);
+        $symbol = $this->getQuerySymbol($fromSymbol, $toSymbol);
+        $queryInterval = $this->getQueryInterval($interval);
 
-        $lines = $this->safeLoad(fn() => $this->klines($symbol, $apiInterval, $limit));
+        $lines = $this->klines($symbol, $queryInterval, $limit);
 
         return $this->floatMap($this->getPricesFromLines($lines));
     }
@@ -63,7 +64,7 @@ class Binance extends AbstractRate
         );
     }
 
-    protected function averagePrice(string $symbol)
+    protected function averagePrice(string $symbol): array
     {
         return Utils::jsonDecode(
             $this->client->get(self::API_V3_URL.'avgPrice', [
@@ -75,7 +76,7 @@ class Binance extends AbstractRate
         );
     }
 
-    protected function klines(string $symbol, string $interval, int $limit = 500)
+    protected function klines(string $symbol, string $interval, int $limit = 500): array
     {
         return Utils::jsonDecode(
             $this->client->get(self::API_V3_URL.'klines', [
@@ -87,28 +88,22 @@ class Binance extends AbstractRate
         );
     }
 
-    protected function defineSymbol(string $fromSymbol, string $toSymbol)
+    protected function getQuerySymbol(string $fromSymbol, string $toSymbol): string
     {
         return $this->usdtReplace($fromSymbol ?: 'BTC') . $this->usdtReplace($toSymbol);
     }
 
-    protected function usdtReplace(string $symbol)
+    protected function usdtReplace(string $symbol): string
     {
         return $symbol === 'USD' ? 'USDT' : $symbol;
     }
 
-    protected function defineInterval(int $interval)
+    protected function getQueryInterval(RateInterval $interval): string
     {
-        switch ($interval) {
-            case self::INTERVAL_MINUTES:
-                return '1m';
-
-            case self::INTERVAL_HOURS:
-            default:
-                return '1h';
-
-            case self::INTERVAL_DAYS:
-                return '1d';
-        }
+        return match ($interval) {
+            RateInterval::Minutes => '1m',
+            RateInterval::Hours => '1h',
+            RateInterval::Days => '1d',
+        };
     }
 }

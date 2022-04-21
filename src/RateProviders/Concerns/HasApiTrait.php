@@ -1,10 +1,10 @@
 <?php
 
-namespace O21\CryptoWallets\Rates\Concerns;
+namespace O21\CryptoWallets\RateProviders\Concerns;
 
 use GuzzleHttp\Client;
 
-trait HasApi
+trait HasApiTrait
 {
     protected Client $client;
 

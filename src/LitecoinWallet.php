@@ -2,12 +2,12 @@
 
 namespace O21\CryptoWallets;
 
-use O21\CryptoWallets\Contracts\WalletRate;
-use O21\CryptoWallets\Estimates\Fee;
+use O21\CryptoWallets\Interfaces\RateProviderInterface as RateProvider;
+use O21\CryptoWallets\Fees\BitcoindFee;
 use Illuminate\Support\Collection;
-use O21\CryptoWallets\Rates\Binance;
+use O21\CryptoWallets\RateProviders\BinanceProvider;
 
-class LitecoinWallet extends BitcoindWallet
+class LitecoinWallet extends AbstractBitcoindWallet
 {
     protected array $confirmationBlocks = [
         2
@@ -26,18 +26,18 @@ class LitecoinWallet extends BitcoindWallet
     protected function getDefaultFees(): Collection
     {
         return collect([
-            new Fee(0.00001000, 2)
+            new BitcoindFee(0.00001000, 2)
         ]);
     }
 
-    public function getExploreTransactionLink(string $txid): string
+    public function getExploreTransactionLink(string $hash): string
     {
-        return sprintf('https://blockchair.com/litecoin/transaction/%s', $txid);
+        return sprintf('https://blockchair.com/litecoin/transaction/%s', $hash);
     }
 
-    protected function getWalletRate(?string $source = null): WalletRate
+    protected function getRateProvider(?RateProvider $provider = null): RateProvider
     {
-        return new Binance;
+        return $provider ?? new BinanceProvider;
     }
 
     public function getTypicalTransactionSize(): int
