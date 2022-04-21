@@ -1,77 +1,90 @@
-## Installation 
+# Installation 
 
 Run ```composer require 021/crypto-wallets```
 
-## Requirements
+# Requirements
 
-- PHP 7.1+
+- PHP 8.1+
 
-## Usage
+# Wallet interface
 
-### Import wallet 
+### \O21\CryptoWallets\Interfaces\WalletInterface
+  `__construct(\O21\CryptoWallets\Interfaces\ConnectConfigInterface $config)`
 
-```use O21\CryptoWallets\BitcoinWallet;``` 
-or 
-```use O21\CryptoWallets\LitecoinWallet;``` 
+  `isAvailable(): bool` - check is RPC client available
 
-### Connect to wallet 
+  `getBalance(): string` - get wallet balance
 
-```
-use O21\CryptoWallets\Configs\BitcoindConfig;
+  `getNewAddress($config = null): string` - get new address
 
-$wallet = new BitcoinWallet(BitcoindConfig::fill(
-    'username',
-    'password',
-    '127.0.0.1',
-    18333
-));
-```
+  `isValidAddress(string $address): bool` - check is an address is valid
 
-### Check connection 
-```$wallet->isAvailable()```
+  `isOwningAddress(string $address): bool` - checks if an address belongs to a wallet
+  
+  `getExploreAddressLink(string $address): string` - returns a link to blockchain explorer for the address
 
-### Wallet
-```
-// Return wallet balance 
-$wallet->getBalance()
+  ```
+  getRate(
+        string $currency = 'USD', 
+        ?\O21\CryptoWallets\Interfaces\RateProviderInterface $provider = null
+  ): float
+  // Returns the cryptocurrency exchange rate for the selected currency
+  ```  
+  ```
+  getBestRate(
+      string $currency = 'USD',
+      int $limit = 60,
+      \O21\CryptoWallets\Units\RateInterval $interval = RateInterval::Minutes,
+      ?\O21\CryptoWallets\Interfaces\RateProviderInterface $provider = null
+  ): float
+  // Returns the best cryptocurrency rate for the selected currency for a given period of time
+  ```
+  ```
+  estimateSendingFee(
+      string $to,
+      string $value,
+      \O21\CryptoWallets\Interfaces\FeeInterface|string $fee
+  ): string
+  // Estimates the fee amount required to send a transaction
+  ```
+  ```
+  send(
+      string $to,
+      string $value,
+      \O21\CryptoWallets\Interfaces\FeeInterface|string $fee
+  ): string
+  // Send funds from a wallet
+  ```
+  `getTransaction(string $hash): ?\O21\CryptoWallets\Interfaces\TransactionInterface` - returns transaction from a wallet
+  
+  `getTransactions(int $count = 50, int $skip = 0): \Illuminate\Support\Collection;` - returns transactions from a wallet
 
-// Return transactions count for wallet
-$wallet->getTransactionsCount()
+  `getTransactionsSinceBlock(string $block = ''): \Illuminate\Support\Collection;` - returns transactions from a wallet
+  
+  `getTransactionsCount(): int` - returns transactions count on a wallet
+  
+  `getExploreTransactionLink(string $hash): string` - returns a link to blockchain explorer for the address
 
-// Return typical transaction size for wallet (Constant)
-$wallet->getTypicalTransactionSize()
-``` 
+  ```
+  /**
+   * @return \Illuminate\Support\Collection<\O21\CryptoWallets\Interfaces\FeeInterface>
+   */
+  public function getNetworkFees(): Collection;
+  // Returns the recommended fees for the transaction
+  ```
 
-### Rates
+  `getDefaultBestRateLimit(): int` - returns the default value for the period in the `getBestRate` function
 
-By default, method ```getRate()``` will return result from binance.com
+  `getTypicalTransactionSize(): int` - returns typical transaction size for a wallet
 
-```
-use O21\CryptoWallets\Contracts\WalletRate;
+  `getSymbol(): string` - returns symbol of a wallet 
 
-// Return USD rate for Bitcoin 
-$wallet->getRate() 
+Also, some wallets have their own unique methods. Explore the interfaces `\O21\CryptoWallets\Interfaces\BitcoindWalletInterface` and `\O21\CryptoWallets\Interfaces\EthereumWalletInterface`
 
-// Return EUR rate for Bitcoin 
-$wallet->getRate('EUR') 
+## Currently available wallets
 
-// Return EUR rate for Bitcoin from blockchain.com
-$wallet->getRate('EUR', WalletRate::RATE_BLOCKCHAIN)
+`\O21\CryptoWallets\BitcoinWallet` for bitcoin
 
-// Return best rate for last 30 minutes 
-$wallet->getBestRate('USD', 30)
-```
+`\O21\CryptoWallets\LitecoinWallet` for litecoin
 
-### Addresses
-```
-// Return new addresses
-$wallet->getNewAddress()
-
-// Return is address valid 
-$wallet->validateAddress('wallet_address')
-
-// Return link to blockchair.com for explain address
-$wallet->getExploreAddressLink('wallet_address')
-```
-
-> To be continued...
+`\O21\CryptoWallets\EthereumWallet` for ethereum
