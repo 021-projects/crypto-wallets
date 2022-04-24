@@ -3,6 +3,7 @@
 namespace O21\CryptoWallets\SmartContracts\Ethereum\Filters;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Web3\Utils;
 
 class LogsFilter extends \stdClass implements Arrayable
 {
@@ -17,11 +18,16 @@ class LogsFilter extends \stdClass implements Arrayable
     public function toArray()
     {
         return array_filter([
-            'fromBlock' => $this->fromBlock,
-            'toBlock' => $this->toBlock,
+            'fromBlock' => $this->toHex($this->fromBlock),
+            'toBlock' => $this->toHex($this->toBlock),
             'address' => $this->address,
             'topics' => $this->topics,
             'blockhash' => $this->blockhash
         ]);
+    }
+
+    private function toHex($value): ?string
+    {
+        return $value ? Utils::toHex($value, true) : null;
     }
 }
