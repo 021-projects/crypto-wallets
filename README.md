@@ -2,6 +2,16 @@
 
 Run ```composer require 021/crypto-wallets```
 
+Add repositories to composer.json
+```
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "git@github.com:021-projects/php-bitcoinrpc.git"
+    }
+]
+```
+
 # Requirements
 
 - PHP 8.1+
