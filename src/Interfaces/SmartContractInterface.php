@@ -15,7 +15,7 @@ interface SmartContractInterface
         string &$error = null
     ): ?EthereumTransactionReceipt;
 
-    public function decodeData(string $data): array;
+    public function decodeData(string $data, array $topics): array;
 
     /**
      * @return \Illuminate\Support\Collection<\O21\Support\FreeObject>

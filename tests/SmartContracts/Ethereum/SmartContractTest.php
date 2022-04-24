@@ -5,6 +5,7 @@ namespace Tests\SmartContracts\Ethereum;
 use O21\CryptoWallets\Models\EthereumCall;
 use O21\CryptoWallets\Models\EthereumTransactionReceipt;
 use O21\CryptoWallets\SmartContracts\Ethereum\DeployParams;
+use O21\CryptoWallets\SmartContracts\Ethereum\Filters\LogsFilter;
 use Tests\Concerns\EthereumWalletTrait;
 use Tests\TestCase;
 
@@ -12,9 +13,10 @@ class SmartContractTest extends TestCase
 {
     use EthereumWalletTrait;
 
-    private const DEPLOYED_CONTRACT_ADDRESS = '0x660ca1a6a1aeaac427433d76c79b35d845f2f27a';
+    private const DEPLOYED_CONTRACT_ADDRESS = '0xb200feb238548ddd5ed683d408b26e32d2d1c5fa';
 
     public const JOKE_TEXT = 'somejoke';
+    public const PHONE_NUMBER = 7777;
 
     protected function setUp(): void
     {
@@ -48,6 +50,15 @@ class SmartContractTest extends TestCase
         $this->assertIsString($hash);
     }
 
+    public function testCallAddPhoneNumberMethod(): void
+    {
+        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+
+        $hash = $smartContract->addPhoneNumber(self::PHONE_NUMBER);
+
+        $this->assertIsString($hash);
+    }
+
     public function testGetFirstAddedJoke(): void
     {
         $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
@@ -59,10 +70,12 @@ class SmartContractTest extends TestCase
     {
         $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
 
-        $logs = $smartContract->getLogs();
+        $filter = new LogsFilter(fromBlock: 1);
+        $logs = $smartContract->getLogs($filter);
 
         $this->assertNotEmpty($logs);
         $this->assertEquals(self::JOKE_TEXT, $logs->first()->data['joke_text']);
+        $this->assertEquals(self::PHONE_NUMBER, (int)(string)$logs[1]->data['number']);
     }
 
     protected function getTestContract(?string $address = null): TestContract

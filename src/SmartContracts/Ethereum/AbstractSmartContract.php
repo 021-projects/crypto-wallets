@@ -6,8 +6,10 @@ use Illuminate\Support\Collection;
 use O21\CryptoWallets\Concerns\EthereumCallsTrait;
 use O21\CryptoWallets\Exceptions\Ethereum\SmartContractAlreadyDeployedException;
 use O21\CryptoWallets\Exceptions\Ethereum\SmartContractNotDeployedException;
+use O21\CryptoWallets\Exceptions\Ethereum\SmartContractUnknownLogEvent;
 use O21\CryptoWallets\Interfaces\EthereumWalletInterface;
 use O21\CryptoWallets\Interfaces\SmartContractInterface;
+use O21\CryptoWallets\Models\EthereumCall;
 use O21\CryptoWallets\Models\EthereumTransactionLog;
 use O21\CryptoWallets\Models\EthereumTransactionReceipt;
 use O21\CryptoWallets\SmartContracts\Ethereum\Filters\LogsFilter;
@@ -63,9 +65,11 @@ abstract class AbstractSmartContract implements SmartContractInterface
         return $receipt;
     }
 
-    public function decodeData(string $data): array
+    public function decodeData(string $data, array $topics): array
     {
-        $types = $this->getLogParameterTypes();
+        $eventNameTopic = first($topics);
+        $types = $this->getLogParameterTypes()[$eventNameTopic] ?? null;
+        throw_unless($types, SmartContractUnknownLogEvent::class, $eventNameTopic);
 
         $params = $this->contract->getEthabi()
             ->decodeParameters(array_values($types), $data);
@@ -126,6 +130,31 @@ abstract class AbstractSmartContract implements SmartContractInterface
         $this->contract->call($method, ...$params);
 
         return $single ? first($result) : $result;
+    }
+
+    public function sendContractMethod(
+        string $method,
+        array $params,
+        ?string $from = null,
+        ?string &$error = null
+    ): ?string {
+        $this->assertDeployed();
+
+        $hash = null;
+        $from ??= $this->ethCall('coinbase');
+
+        $arguments = [
+            $method,
+            ...$params,
+            (new EthereumCall($from))->toArray(),
+            function ($err, $txid) use (&$error, &$hash) {
+                $error = $err;
+                $hash = $txid;
+            }
+        ];
+        $this->contract->send(...$arguments);
+
+        return $hash;
     }
 
     protected function assertDeployed(): void

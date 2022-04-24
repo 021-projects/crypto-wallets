@@ -24,7 +24,7 @@ class EthereumTransactionLog extends FreeObject
             'address'          => $log->address,
             'block_hash'       => $log->blockHash,
             'block_number'     => hexdec($log->blockNumber),
-            'data'             => $contract->decodeData($log->data),
+            'data'             => $contract->decodeData($log->data, $log->topics),
             'log_index'        => hexdec($log->logIndex),
             'removed'          => $log->removed,
             'topics'           => $log->topics,
