@@ -6,13 +6,13 @@ use Illuminate\Support\Collection;
 use O21\CryptoWallets\Concerns\EthereumCallsTrait;
 use O21\CryptoWallets\Exceptions\Ethereum\SmartContractAlreadyDeployedException;
 use O21\CryptoWallets\Exceptions\Ethereum\SmartContractNotDeployedException;
-use O21\CryptoWallets\Exceptions\Ethereum\SmartContractUnknownLogEvent;
 use O21\CryptoWallets\Interfaces\EthereumWalletInterface;
 use O21\CryptoWallets\Interfaces\SmartContractInterface;
 use O21\CryptoWallets\Models\EthereumCall;
 use O21\CryptoWallets\Models\EthereumTransactionLog;
 use O21\CryptoWallets\Models\EthereumTransactionReceipt;
 use O21\CryptoWallets\SmartContracts\Ethereum\Filters\LogsFilter;
+use O21\CryptoWallets\Web3\EthAbi;
 use Web3\Contract;
 
 abstract class AbstractSmartContract implements SmartContractInterface
@@ -21,9 +21,9 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
     protected Contract $contract;
 
-    protected ?string $address = null;
+    protected EthAbi $abi;
 
-    abstract protected function getLogParameterTypes(): array;
+    protected ?string $address = null;
 
     public function __construct(
         protected EthereumWalletInterface $wallet,
@@ -32,6 +32,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
         $this->eth = $wallet->getEth();
         $this->contract = (new Contract($this->eth->getProvider(), static::getAbi()))
             ->bytecode(static::getByteCode());
+        $this->abi = new EthAbi($this->contract);
 
         $this->setAddress($address);
     }
@@ -67,14 +68,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
     public function decodeData(string $data, array $topics): array
     {
-        $eventNameTopic = first($topics);
-        $types = $this->getLogParameterTypes()[$eventNameTopic] ?? null;
-        throw_unless($types, SmartContractUnknownLogEvent::class, $eventNameTopic);
-
-        $params = $this->contract->getEthabi()
-            ->decodeParameters(array_values($types), $data);
-
-        return array_combine(array_keys($types), $params);
+        return $this->abi->decodeEventLogData($data, $topics);
     }
 
     public function getLogs(?LogsFilter $filter = null): Collection

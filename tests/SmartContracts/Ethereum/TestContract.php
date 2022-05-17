@@ -3,7 +3,6 @@
 namespace Tests\SmartContracts\Ethereum;
 
 use O21\CryptoWallets\SmartContracts\Ethereum\AbstractSmartContract;
-use Web3\Utils;
 
 class TestContract extends AbstractSmartContract
 {
@@ -49,18 +48,5 @@ byteCode;
         ?string &$error = null
     ): ?string {
         return $this->sendContractMethod('addPhoneNumber', [$number], $from, $error);
-    }
-
-    protected function getLogParameterTypes(): array
-    {
-        return [
-            Utils::sha3('NewJoke(uint256,string)') => [
-                'joke_text' => 'string',
-                'index' => 'uint256'
-            ],
-            Utils::sha3('NewPhoneNumber(uint256)') => [
-                'number' => 'uint256'
-            ],
-        ];
     }
 }
