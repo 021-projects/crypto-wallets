@@ -2,6 +2,7 @@
 
 namespace O21\CryptoWallets\Models;
 
+use Illuminate\Support\Arr;
 use O21\CryptoWallets\Units\TransactionType;
 
 /**
@@ -23,21 +24,26 @@ class BitcoindTransaction extends AbstractTransaction
     {
         $firstDetail = ! empty($tx['details']) ? first($tx['details']) : [];
 
+        $address = Arr::get($tx, 'address', Arr::get($firstDetail, 'address'));
+        $amount = abs(Arr::get($tx, 'amount', Arr::get($firstDetail, 'amount', 0)));
+        $label = Arr::get($tx, 'label', Arr::get($firstDetail, 'label', ''));
+        $vout = Arr::get($tx, 'vout', Arr::get($firstDetail, 'vout'));
+
         return new BitcoindTransaction([
-            'hash'             => $tx['txid'],
-            'address'          => $tx['address'] ?? $firstDetail['address'],
+            'hash'             => Arr::get($tx, 'txid'),
+            'address'          => $address,
             'type'             => self::defineRpcTransactionType($tx),
-            'amount'           => abs($tx['amount'] ?: $firstDetail['amount']),
-            'confirmations'    => $tx['confirmations'],
-            'block_hash'       => $tx['blockhash'] ?? null,
-            'block_number'     => $tx['blockindex'] ?? null,
-            'block_time'       => $tx['blocktime'] ?? null,
-            'time'             => $tx['time'],
-            'time_received'    => $tx['timereceived'],
-            'label'            => $tx['label'] ?? $firstDetail['label'],
-            'vout'             => $tx['vout'] ?? $firstDetail['vout'],
-            'details'          => $tx['details'] ?? [],
-            'wallet_conflicts' => $tx['walletconflicts'] ?? []
+            'amount'           => $amount,
+            'confirmations'    => Arr::get($tx, 'confirmations'),
+            'block_hash'       => Arr::get($tx, 'blockhash'),
+            'block_number'     => Arr::get($tx, 'blockindex'),
+            'block_time'       => Arr::get($tx, 'blocktime'),
+            'time'             => Arr::get($tx, 'time'),
+            'time_received'    => Arr::get($tx, 'timereceived'),
+            'label'            => $label,
+            'vout'             => $vout,
+            'details'          => Arr::get($tx, 'details', []),
+            'wallet_conflicts' => Arr::get($tx, 'walletconflicts', [])
         ]);
     }
 
