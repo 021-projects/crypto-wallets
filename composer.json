@@ -29,7 +29,7 @@
         "illuminate/support": "^8.80|^9.0",
         "guzzlehttp/guzzle": "^7.4",
         "jaggedsoft/php-binance-api": "^0.5.28",
-        "021/support": "^2.0",
+        "021/support": "^2.0.1",
         "denpa/php-bitcoinrpc": "^v3.0.0",
         "ext-bcmath": "*",
         "web3p/web3.php": "0.1.6",
