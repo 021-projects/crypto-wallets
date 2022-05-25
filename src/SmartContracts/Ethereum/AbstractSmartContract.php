@@ -96,9 +96,9 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
     /**
      * @param  string|null  $address
-     * @return AbstractSmartContract
+     * @return SmartContractInterface
      */
-    public function setAddress(?string $address): AbstractSmartContract
+    public function setAddress(?string $address): SmartContractInterface
     {
         $this->address = $address;
 
@@ -149,6 +149,31 @@ abstract class AbstractSmartContract implements SmartContractInterface
         $this->contract->send(...$arguments);
 
         return $hash;
+    }
+
+    public function estimateGas(
+        string $method,
+        array $params,
+        ?string $from = null,
+        ?string &$error = null
+    ): ?string {
+        $this->assertDeployed();
+
+        $gas = null;
+        $from ??= $this->ethCall('coinbase');
+
+        $arguments = [
+            $method,
+            ...$params,
+            (new EthereumCall($from))->toArray(),
+            function ($err, $_gas) use (&$error, &$gas) {
+                $error = $err;
+                $gas = $_gas;
+            }
+        ];
+        $this->contract->estimateGas(...$arguments);
+
+        return $gas;
     }
 
     protected function assertDeployed(): void

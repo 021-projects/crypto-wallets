@@ -13,7 +13,7 @@ class SmartContractTest extends TestCase
 {
     use EthereumWalletTrait;
 
-    private const DEPLOYED_CONTRACT_ADDRESS = '0xb200feb238548ddd5ed683d408b26e32d2d1c5fa';
+    private const DEPLOYED_CONTRACT_ADDRESS = '0x9c4b41461c389a7814257129ef5038019de5920c';
 
     public const JOKE_TEXT = 'somejoke';
     public const PHONE_NUMBER = 7777;
@@ -48,6 +48,15 @@ class SmartContractTest extends TestCase
         $hash = $smartContract->joke(self::JOKE_TEXT);
 
         $this->assertIsString($hash);
+    }
+
+    public function testEstimateGasJokeMethod(): void
+    {
+        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+
+        $gas = $smartContract->estimateJokeGas(self::JOKE_TEXT);
+
+        $this->assertEquals('69363', $gas);
     }
 
     public function testCallAddPhoneNumberMethod(): void

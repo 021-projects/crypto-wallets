@@ -37,6 +37,14 @@ byteCode;
         return $this->sendContractMethod('joke', [$text], $from, $error);
     }
 
+    public function estimateJokeGas(
+        string $text,
+        ?string $from = null,
+        ?string &$error = null
+    ): ?string {
+        return $this->estimateGas('joke', [$text], $from, $error);
+    }
+
     public function getJoke(int $index): ?string
     {
         return first($this->call('getJoke', true, $index));

@@ -22,6 +22,26 @@ interface SmartContractInterface
      */
     public function getLogs(): Collection;
 
+    public function getAddress(): ?string;
+
+    public function setAddress(?string $address): SmartContractInterface;
+
+    public function call(string $method, bool $single = true, ...$params): mixed;
+
+    public function sendContractMethod(
+        string $method,
+        array $params,
+        ?string $from = null,
+        ?string &$error = null
+    ): ?string;
+
+    public function estimateGas(
+        string $method,
+        array $params,
+        ?string $from = null,
+        ?string &$error = null
+    ): ?string;
+
     public static function getAbi(): array;
 
     public static function getByteCode(): string;
