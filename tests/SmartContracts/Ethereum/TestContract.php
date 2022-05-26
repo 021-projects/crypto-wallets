@@ -2,6 +2,7 @@
 
 namespace Tests\SmartContracts\Ethereum;
 
+use O21\CryptoWallets\Models\EthereumCall;
 use O21\CryptoWallets\SmartContracts\Ethereum\AbstractSmartContract;
 
 class TestContract extends AbstractSmartContract
@@ -34,7 +35,12 @@ byteCode;
         ?string $from = null,
         ?string &$error = null
     ): ?string {
-        return $this->sendContractMethod('joke', [$text], $from, $error);
+        return $this->send(
+            'joke',
+            [$text],
+            new EthereumCall(from: $from),
+            $error
+        );
     }
 
     public function estimateJokeGas(
@@ -42,12 +48,20 @@ byteCode;
         ?string $from = null,
         ?string &$error = null
     ): ?string {
-        return $this->estimateGas('joke', [$text], $from, $error);
+        return $this->estimateGas(
+            'joke',
+            [$text],
+            new EthereumCall(from: $from),
+            $error
+        );
     }
 
     public function getJoke(int $index): ?string
     {
-        return first($this->call('getJoke', true, $index));
+        return first($this->call(
+            'getJoke',
+            [$index]
+        ));
     }
 
     public function addPhoneNumber(
@@ -55,6 +69,11 @@ byteCode;
         ?string $from = null,
         ?string &$error = null
     ): ?string {
-        return $this->sendContractMethod('addPhoneNumber', [$number], $from, $error);
+        return $this->send(
+            'addPhoneNumber',
+            [$number],
+            new EthereumCall(from: $from),
+            $error
+        );
     }
 }

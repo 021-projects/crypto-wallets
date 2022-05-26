@@ -109,43 +109,50 @@ abstract class AbstractSmartContract implements SmartContractInterface
         return $this;
     }
 
-    public function call(string $method, bool $single = true, ...$params): mixed
-    {
+    public function call(
+        string $method,
+        array $params,
+        ?EthereumCall $call = null,
+        bool $single = true
+    ): mixed {
         $result = [];
 
-        $params[] = static function ($err, ...$args) use (&$result) {
-            if ($err !== null) {
-                throw $err;
+        $arguments = $this->buildContractMethodArguments(
+            $method,
+            $params,
+            $call,
+            function ($err, ...$args) use (&$result) {
+                if ($err !== null) {
+                    throw $err;
+                }
+
+                $result = $args;
             }
-
-            $result = $args;
-        };
-
-        $this->contract->call($method, ...$params);
+        );
+        $this->contract->call(...$arguments);
 
         return $single ? first($result) : $result;
     }
 
-    public function sendContractMethod(
+    public function send(
         string $method,
         array $params,
-        ?string $from = null,
+        ?EthereumCall $call = null,
         ?string &$error = null
     ): ?string {
         $this->assertDeployed();
 
         $hash = null;
-        $from ??= $this->ethCall('coinbase');
 
-        $arguments = [
+        $arguments = $this->buildContractMethodArguments(
             $method,
-            ...$params,
-            (new EthereumCall($from))->toArray(),
+            $params,
+            $this->assertEthereumCallFromDefined($call),
             function ($err, $txid) use (&$error, &$hash) {
                 $error = $err;
                 $hash = $txid;
             }
-        ];
+        );
         $this->contract->send(...$arguments);
 
         return $hash;
@@ -154,26 +161,67 @@ abstract class AbstractSmartContract implements SmartContractInterface
     public function estimateGas(
         string $method,
         array $params,
-        ?string $from = null,
+        ?EthereumCall $call = null,
         ?string &$error = null
     ): ?string {
         $this->assertDeployed();
 
         $gas = null;
-        $from ??= $this->ethCall('coinbase');
 
-        $arguments = [
+        $arguments = $this->buildContractMethodArguments(
             $method,
-            ...$params,
-            (new EthereumCall($from))->toArray(),
+            $params,
+            $this->assertEthereumCallFromDefined($call),
             function ($err, $_gas) use (&$error, &$gas) {
                 $error = $err;
                 $gas = $_gas;
             }
-        ];
+        );
         $this->contract->estimateGas(...$arguments);
 
         return $gas;
+    }
+
+    protected function buildContractMethodArguments(
+        string $method,
+        array $params,
+        ?EthereumCall $call = null,
+        ?callable $callback = null
+    ): array {
+        if (! $call) {
+            $call = new EthereumCall();
+        }
+
+        $callback ??= static function ($err) {
+            if ($err !== null) {
+                throw $err;
+            }
+        };
+
+        return [
+            $method,
+            ...$params,
+            $call->toArray(),
+            $callback
+        ];
+    }
+
+    protected function getCoinbase(): string
+    {
+        return $this->ethCall('coinbase');
+    }
+
+    protected function assertEthereumCallFromDefined(?EthereumCall $call = null): EthereumCall
+    {
+        if (! $call) {
+            $call = new EthereumCall($this->getCoinbase());
+        }
+
+        if (! $call->from) {
+            $call->from = $this->getCoinbase();
+        }
+
+        return $call;
     }
 
     protected function assertDeployed(): void

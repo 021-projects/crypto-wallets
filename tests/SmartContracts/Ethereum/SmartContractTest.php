@@ -13,8 +13,6 @@ class SmartContractTest extends TestCase
 {
     use EthereumWalletTrait;
 
-    private const DEPLOYED_CONTRACT_ADDRESS = '0x9c4b41461c389a7814257129ef5038019de5920c';
-
     public const JOKE_TEXT = 'somejoke';
     public const PHONE_NUMBER = 7777;
 
@@ -39,11 +37,13 @@ class SmartContractTest extends TestCase
         $this->assertNull($error);
         $this->assertNotEmpty($smartContract->getAddress());
         $this->assertInstanceOf(EthereumTransactionReceipt::class, $receipt);
+
+        $_ENV['ETHEREUM_SMART_CONTRACT_TEST_ADDRESS'] = $smartContract->getAddress();
     }
 
     public function testCallJokeMethod(): void
     {
-        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+        $smartContract = $this->getTestContract($_ENV['ETHEREUM_SMART_CONTRACT_TEST_ADDRESS']);
 
         $hash = $smartContract->joke(self::JOKE_TEXT);
 
@@ -52,16 +52,16 @@ class SmartContractTest extends TestCase
 
     public function testEstimateGasJokeMethod(): void
     {
-        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+        $smartContract = $this->getTestContract($_ENV['ETHEREUM_SMART_CONTRACT_TEST_ADDRESS']);
 
         $gas = $smartContract->estimateJokeGas(self::JOKE_TEXT);
 
-        $this->assertEquals('69363', $gas);
+        $this->assertGreaterThan('50000', $gas);
     }
 
     public function testCallAddPhoneNumberMethod(): void
     {
-        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+        $smartContract = $this->getTestContract($_ENV['ETHEREUM_SMART_CONTRACT_TEST_ADDRESS']);
 
         $hash = $smartContract->addPhoneNumber(self::PHONE_NUMBER);
 
@@ -70,21 +70,22 @@ class SmartContractTest extends TestCase
 
     public function testGetFirstAddedJoke(): void
     {
-        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+        $smartContract = $this->getTestContract($_ENV['ETHEREUM_SMART_CONTRACT_TEST_ADDRESS']);
 
         $this->assertEquals(self::JOKE_TEXT, $smartContract->getJoke(0));
     }
 
     public function testDecodeLogParameters(): void
     {
-        $smartContract = $this->getTestContract(self::DEPLOYED_CONTRACT_ADDRESS);
+        $smartContract = $this->getTestContract($_ENV['ETHEREUM_SMART_CONTRACT_TEST_ADDRESS']);
 
         $filter = new LogsFilter(fromBlock: 1);
         $logs = $smartContract->getLogs($filter);
 
         $this->assertNotEmpty($logs);
-        $this->assertEquals(self::JOKE_TEXT, $logs->first()->data['joke_text']);
-        $this->assertEquals(self::PHONE_NUMBER, (int)(string)$logs[1]->data['number']);
+
+        $this->assertEquals(self::JOKE_TEXT, $logs->first()->data['text']);
+        $this->assertEquals(self::PHONE_NUMBER, (int)(string)$logs->get(1)->data['_number']);
     }
 
     protected function getTestContract(?string $address = null): TestContract
