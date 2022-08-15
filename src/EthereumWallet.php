@@ -140,7 +140,7 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
     {
         $methodName = is_string($hashOrNumber) ? 'getBlockByHash' : 'getBlockByNumber';
 
-        return EthereumBlock::fromRpcBlock(
+        return $this->wrapEthereumBlock(
             $this->ethCall($methodName, [$hashOrNumber, $fullTransactions]),
             $this->getLastBlockNumber()
         );
@@ -172,7 +172,7 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
             ? $this->ethCall('getBlockByNumber', [ $tx->blockNumber, false ])
             : null;
 
-        return EthereumTransaction::fromRpcTransaction(
+        return $this->wrapEthereumTransaction(
             $tx,
             $block,
             $this->getLastBlockNumber()
@@ -192,7 +192,7 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
             $contract = $this->getSmartContract($contract);
         }
 
-        return EthereumTransactionReceipt::fromRpcReceipt($receiptStd, $contract);
+        return $this->wrapEthereumTransactionReceipt($receiptStd, $contract);
     }
 
     /**
@@ -242,8 +242,8 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
 
         return collect(
             array_map(
-                static fn(\stdClass $tx)
-                    => EthereumTransaction::fromRpcTransaction($tx, $block, (int)(string)$lastBlockNumber),
+                fn(\stdClass $tx)
+                    => $this->wrapEthereumTransaction($tx, $block, (int)(string)$lastBlockNumber),
                 $block->transactions
             )
         );
@@ -266,6 +266,28 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
         }
 
         return $transactions;
+    }
+
+    protected function wrapEthereumBlock(
+        \stdClass $block,
+        int $lastBlockNumber
+    ): EthereumBlock {
+        return EthereumBlock::fromRpcBlock($block, $lastBlockNumber);
+    }
+
+    protected function wrapEthereumTransaction(
+        \stdClass $tx,
+        ?\stdClass $block,
+        int $lastBlockNumber
+    ): EthereumTransaction {
+        return EthereumTransaction::fromRpcTransaction($tx, $block, $lastBlockNumber);
+    }
+
+    protected function wrapEthereumTransactionReceipt(
+        \stdClass $receipt,
+        ?SmartContractInterface $contract = null
+    ): EthereumTransactionReceipt {
+        return EthereumTransactionReceipt::fromRpcReceipt($receipt, $contract);
     }
 
     public function getExploreTransactionLink(string $hash): string

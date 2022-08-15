@@ -51,7 +51,7 @@ class EthereumTransaction extends AbstractTransaction
             's'                        => $tx->s,
             'v'                        => $tx->v,
             'input'                    => $tx->input,
-            'transaction_index'        => hexdec($tx->transactionIndex)
+            'transaction_index'        => $tx->transactionIndex ? hexdec($tx->transactionIndex) : null,
         ]);
     }
 

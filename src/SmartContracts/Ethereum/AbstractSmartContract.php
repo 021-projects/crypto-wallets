@@ -100,18 +100,19 @@ abstract class AbstractSmartContract implements SmartContractInterface
      */
     public function setAddress(?string $address): SmartContractInterface
     {
-        $this->address = $address;
-
         if ($address) {
+            $address = mb_strtolower($address);
             $this->contract->at($address);
         }
+
+        $this->address = $address;
 
         return $this;
     }
 
     public function call(
         string $method,
-        array $params,
+        array $params = [],
         ?EthereumCall $call = null,
         bool $single = true
     ): mixed {
@@ -136,7 +137,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
     public function send(
         string $method,
-        array $params,
+        array $params = [],
         ?EthereumCall $call = null,
         ?string &$error = null
     ): ?string {
@@ -160,7 +161,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
     public function estimateGas(
         string $method,
-        array $params,
+        array $params = [],
         ?EthereumCall $call = null,
         ?string &$error = null
     ): ?string {
@@ -184,7 +185,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
 
     protected function buildContractMethodArguments(
         string $method,
-        array $params,
+        array $params = [],
         ?EthereumCall $call = null,
         ?callable $callback = null
     ): array {
