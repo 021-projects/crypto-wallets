@@ -87,4 +87,40 @@ class ConnectConfig implements ConnectConfigInterface
     {
         return $this->walletName;
     }
+
+    public function setUser(string $value): ConnectConfigInterface
+    {
+        $this->user = $value;
+        return $this;
+    }
+
+    public function setPassword(string $value): ConnectConfigInterface
+    {
+        $this->password = $value;
+        return $this;
+    }
+
+    public function setHost(string $value): ConnectConfigInterface
+    {
+        $this->host = $value;
+        return $this;
+    }
+
+    public function setPort(int $value): ConnectConfigInterface
+    {
+        $this->port = $value;
+        return $this;
+    }
+
+    public function setScheme(string $value): ConnectConfigInterface
+    {
+        $this->scheme = $value;
+        return $this;
+    }
+
+    public function setWalletName(string $value): ConnectConfigInterface
+    {
+        $this->walletName = $value;
+        return $this;
+    }
 }

@@ -26,4 +26,16 @@ class ERC20ConnectConfig extends ConnectConfig implements ConnectConfigInterface
     {
         return $this->tokenDecimals;
     }
+
+    public function setContractAddress(string $value): ConnectConfigInterface
+    {
+        $this->contractAddress = $value;
+        return $this;
+    }
+
+    public function setTokenDecimals(int $value): ConnectConfigInterface
+    {
+        $this->tokenDecimals = $value;
+        return $this;
+    }
 }

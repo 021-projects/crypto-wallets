@@ -16,6 +16,8 @@ interface ConnectConfigInterface extends \O21\CryptoWallets\Interfaces\ConnectCo
     );
 
     public function getContractAddress(): string;
+    public function setContractAddress(string $value): ConnectConfigInterface;
 
     public function getTokenDecimals(): int;
+    public function setTokenDecimals(int $value): ConnectConfigInterface;
 }

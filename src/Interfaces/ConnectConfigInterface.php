@@ -18,14 +18,20 @@ interface ConnectConfigInterface extends Arrayable
     public function toUrl(): string;
 
     public function getUser(): string;
+    public function setUser(string $value): ConnectConfigInterface;
 
     public function getPassword(): string;
+    public function setPassword(string $value): ConnectConfigInterface;
 
     public function getHost(): string;
+    public function setHost(string $value): ConnectConfigInterface;
 
     public function getPort(): int;
+    public function setPort(int $value): ConnectConfigInterface;
 
     public function getScheme(): string;
+    public function setScheme(string $value): ConnectConfigInterface;
 
     public function getWalletName(): string;
+    public function setWalletName(string $value): ConnectConfigInterface;
 }
