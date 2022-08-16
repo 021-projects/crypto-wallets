@@ -37,10 +37,17 @@ class EthAbi
         );
 
         foreach ($indexedParamNames as $key => $indexedParamName) {
-            $decodedData[$indexedParamName] = $contractAbi->decodeParameter(
-                $indexedParamTypes[$key],
-                Arr::get($topics, $key + 1)
-            );
+            $paramType = $indexedParamTypes[$key];
+            // can't decode indexed string param
+            // https://stackoverflow.com/questions/73232215/how-to-decode-the-indexed-string-param-in-an-event-using-web3-js
+            if ($paramType === 'string') {
+                $decodedData[$indexedParamName] = Arr::get($topics, $key + 1);
+            } else {
+                $decodedData[$indexedParamName] = $contractAbi->decodeParameter(
+                    $paramType,
+                    Arr::get($topics, $key + 1)
+                );
+            }
         }
 
         return $decodedData;
