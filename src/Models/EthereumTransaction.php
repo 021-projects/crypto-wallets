@@ -29,7 +29,7 @@ class EthereumTransaction extends AbstractTransaction
     {
         return new static([
             'hash'                     => $tx->hash,
-            'block_hash'               => $tx->hash ?? null,
+            'block_hash'               => $tx->blockHash ?? null,
             'block_number'             => isset($tx->blockNumber) ? hexdec($tx->blockNumber) : null,
             'access_list'              => $tx->accessList ?? [],
             'chain_id'                 => $tx->chainId ?? '',
