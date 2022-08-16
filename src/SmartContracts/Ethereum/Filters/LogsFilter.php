@@ -28,6 +28,10 @@ class LogsFilter extends \stdClass implements Arrayable
 
     private function toHex($value): ?string
     {
+        if (str_starts_with($value, '0x')) {
+            return $value;
+        }
+
         return $value ? Utils::toHex($value, true) : null;
     }
 }
