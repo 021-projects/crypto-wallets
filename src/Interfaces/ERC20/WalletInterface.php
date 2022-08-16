@@ -2,6 +2,8 @@
 
 namespace O21\CryptoWallets\Interfaces\ERC20;
 
+use O21\CryptoWallets\Interfaces\ERC20\TokenContractInterface as ITokenContract;
+
 interface WalletInterface extends \O21\CryptoWallets\Interfaces\WalletInterface
 {
     /**
@@ -21,6 +23,11 @@ interface WalletInterface extends \O21\CryptoWallets\Interfaces\WalletInterface
     public function fromWeiToToken($value): string;
 
     public function fromTokenToWei($value): string;
+
+    /**
+     * @return \O21\CryptoWallets\Interfaces\ERC20\TokenContractInterface
+     */
+    public function getContract(): ITokenContract;
 
     public function getContractAddress(): string;
 }

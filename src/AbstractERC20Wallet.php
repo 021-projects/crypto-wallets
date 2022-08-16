@@ -221,6 +221,14 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
         );
     }
 
+    /**
+     * @return \O21\CryptoWallets\Interfaces\ERC20\TokenContractInterface
+     */
+    public function getContract(): ITokenContract
+    {
+        return $this->contract;
+    }
+
     public function getContractAddress(): string
     {
         return $this->contract->getAddress();
