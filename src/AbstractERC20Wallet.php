@@ -12,6 +12,8 @@ use O21\CryptoWallets\Interfaces\SmartContractInterface;
 use O21\CryptoWallets\Models\ERC20EthereumTransaction;
 use O21\CryptoWallets\Models\ERC20EthereumTransactionReceipt;
 use O21\CryptoWallets\Models\EthereumCall;
+use O21\CryptoWallets\Support\EthereumGas;
+use O21\CryptoWallets\Support\Fee;
 use O21\CryptoWallets\Support\Number;
 
 abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Wallet
@@ -64,16 +66,20 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
         string|FeeInterface $fee,
         ?string $from = null
     ): string {
-        $call = $this->getFeeEthCall($fee);
+        $call = $this->getFeeEthCall($to, $value, $fee);
+        $baseFee = $this->getBlock('pending')->baseFeePerGas;
         if ($from) {
-            return $this->contract->estimateTransferFromGas(
-                $from,
-                $to,
-                $value,
-                $call
+            return EthereumGas::estimateMaxGasFee(
+                $this->contract->estimateTransferFromGas($from, $to, $value, $call),
+                $baseFee,
+                $fee
             );
         }
-        return $this->contract->estimateTransferGas($to, $value, $call);
+        return EthereumGas::estimateMaxGasFee(
+            $this->contract->estimateTransferGas($to, $value, $call),
+            $baseFee,
+            $fee
+        );
     }
 
     public function send(
@@ -82,7 +88,7 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
         string|FeeInterface $fee,
         ?string $from = null
     ): string {
-        $call = $this->getFeeEthCall($fee);
+        $call = $this->getFeeEthCall($to, $value, $fee);
         if ($from) {
             return $this->contract->transferFrom(
                 $from,
@@ -94,14 +100,14 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
         return $this->contract->transfer($to, $value, $call);
     }
 
-    protected function getFeeEthCall(string|FeeInterface $fee): EthereumCall
-    {
-        $baseFee = $this->getBlock($this->getLastBlockNumber())->baseFeePerGas;
-        $tip = $this->feeValue($fee);
-
+    protected function getFeeEthCall(
+        string $to,
+        string $value,
+        string|FeeInterface $fee
+    ): EthereumCall {
         return new EthereumCall(
-            maxPriorityFeePerGas: $tip,
-            maxFeePerGas        : bcadd($tip, bcmul('2', $baseFee))
+            maxPriorityFeePerGas: Fee::getValue($fee),
+            maxFeePerGas        : $this->estimateSendingFee($to, $value, $fee),
         );
     }
 
