@@ -18,6 +18,8 @@ use O21\CryptoWallets\Models\EthereumCall;
 use O21\CryptoWallets\Models\EthereumTransaction;
 use O21\CryptoWallets\Models\EthereumTransactionReceipt;
 use O21\CryptoWallets\RateProviders\BinanceProvider;
+use O21\CryptoWallets\Support\EthereumGas;
+use O21\CryptoWallets\Support\Fee;
 use O21\CryptoWallets\Units\Ethereum;
 use O21\EthereumOracles\Contracts\OracleApi;
 use O21\EthereumOracles\OffChain\Blockscout;
@@ -97,7 +99,7 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
      * @param  string  $value  Transaction amount in Wei
      * @param  \O21\CryptoWallets\Interfaces\FeeInterface|string  $fee  Tip for miners in Wei
      * @param  string|null  $from
-     * @return string 21000 * base fee + fee value
+     * @return string 21000 * (baseFee * 2 + maxPriorityFeePerGas)
      */
     public function estimateSendingFee(
         string $to,
@@ -105,8 +107,11 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
         FeeInterface|string $fee,
         ?string $from = null
     ): string {
-        $baseFee = $this->getBlock($this->getLastBlockNumber())->baseFeePerGas;
-        return bcmul('21000', bcadd($this->feeValue($fee), bcmul('2', $baseFee)));
+        return EthereumGas::estimateMaxGasFee(
+            21000,
+            $this->getBlock('pending')->baseFeePerGas,
+            $fee
+        );
     }
 
     /**
@@ -122,14 +127,11 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
         FeeInterface|string $fee,
         ?string $from = null
     ): string {
-        $baseFee = $this->getBlock($this->getLastBlockNumber())->baseFeePerGas;
-        $tip = $this->feeValue($fee);
-
         $call = new EthereumCall(
             from                : $from ?? $this->getCoinbase(),
             to                  : $to,
-            maxPriorityFeePerGas: $tip,
-            maxFeePerGas        : bcadd($tip, bcmul('2', $baseFee)),
+            maxPriorityFeePerGas: Fee::getValue($fee),
+            maxFeePerGas        : $this->estimateSendingFee($to, $value, $fee),
             value               : $value
         );
 
