@@ -5,6 +5,7 @@ namespace O21\CryptoWallets;
 use O21\CryptoWallets\Concerns\GetRatesTrait;
 use O21\CryptoWallets\Interfaces\FeeInterface;
 use O21\CryptoWallets\Interfaces\RateProviderInterface as RateProvider;
+use O21\CryptoWallets\Support\Fee;
 
 abstract class AbstractWallet
 {
@@ -14,8 +15,6 @@ abstract class AbstractWallet
 
     protected function feeValue(FeeInterface|string $fee): string
     {
-        return $fee instanceof FeeInterface
-            ? $fee->getValue()
-            : $fee;
+        return Fee::getValue($fee);
     }
 }
