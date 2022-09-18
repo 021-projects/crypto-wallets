@@ -140,12 +140,23 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
 
     public function getBlock(int|string $hashOrNumber, bool $fullTransactions = false): EthereumBlock
     {
-        $methodName = is_string($hashOrNumber) ? 'getBlockByHash' : 'getBlockByNumber';
+        $methodName = $this->getGetBlockMethodName($hashOrNumber);
 
         return $this->wrapEthereumBlock(
             $this->ethCall($methodName, [$hashOrNumber, $fullTransactions]),
             $this->getLastBlockNumber()
         );
+    }
+
+    protected function getGetBlockMethodName(int|string $hashOrNumber): string
+    {
+        if (is_numeric($hashOrNumber)
+            || in_array($hashOrNumber, ['latest', 'pending', 'earliest'], true)
+        ) {
+            return 'getBlockByNumber';
+        }
+
+        return 'getBlockByHash';
     }
 
     public function getAccounts(): array
