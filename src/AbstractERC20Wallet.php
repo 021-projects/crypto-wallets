@@ -66,7 +66,7 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
         string|FeeInterface $fee,
         ?string $from = null
     ): string {
-        $call = $this->getFeeEthCall($to, $value, $fee);
+        $call = $this->getFeeEthCall($to, $value);
         $baseFee = $this->getBlock('pending')->baseFeePerGas;
         if ($from) {
             return EthereumGas::estimateMaxGasFee(
@@ -103,11 +103,11 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
     protected function getFeeEthCall(
         string $to,
         string $value,
-        string|FeeInterface $fee
+        string|FeeInterface|null $fee = null
     ): EthereumCall {
         return new EthereumCall(
-            maxPriorityFeePerGas: Fee::getValue($fee),
-            maxFeePerGas        : $this->estimateSendingFee($to, $value, $fee),
+            maxPriorityFeePerGas: $fee ? Fee::getValue($fee) : null,
+            maxFeePerGas        : $fee ? $this->estimateSendingFee($to, $value, $fee) : null,
         );
     }
 
