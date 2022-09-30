@@ -3,6 +3,7 @@
 namespace O21\CryptoWallets;
 
 use Illuminate\Support\Collection;
+use O21\CryptoWallets\Exceptions\SendException;
 use O21\CryptoWallets\Interfaces\ConnectConfigInterface;
 use O21\CryptoWallets\Interfaces\ERC20\WalletInterface as IERC20Wallet;
 use O21\CryptoWallets\Interfaces\ERC20\TokenContractInterface as ITokenContract;
@@ -82,6 +83,9 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
         );
     }
 
+    /**
+     * @throws \O21\CryptoWallets\Exceptions\SendException
+     */
     public function send(
         string $to,
         string $value,
@@ -90,14 +94,22 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
     ): string {
         $call = $this->getFeeEthCall($to, $value, $fee);
         if ($from) {
-            return $this->contract->transferFrom(
+            $hash = $this->contract->transferFrom(
                 $from,
                 $to,
                 $value,
-                $call
+                $call,
+                $error
             );
+        } else {
+            $hash = $this->contract->transfer($to, $value, $call, $error);
         }
-        return $this->contract->transfer($to, $value, $call);
+
+        if (! $hash) {
+            throw SendException::withError($error);
+        }
+
+        return $hash;
     }
 
     protected function getFeeEthCall(
