@@ -16,31 +16,27 @@ interface TokenContractInterface extends SmartContractInterface
     public function transfer(
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string;
 
     public function estimateTransferGas(
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string;
 
     public function transferFrom(
         string $from,
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string;
 
     public function estimateTransferFromGas(
         string $from,
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string;
 
     // todo add more methods

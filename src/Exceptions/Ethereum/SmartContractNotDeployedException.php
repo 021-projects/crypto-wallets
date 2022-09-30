@@ -13,4 +13,9 @@ class SmartContractNotDeployedException extends Exception
     ) {
         parent::__construct($message, $code, $previous);
     }
+
+    public static function noReceipt(): static
+    {
+        return new static("Smart contract not deployed. Can't get transaction receipt for created contract.");
+    }
 }

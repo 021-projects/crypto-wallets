@@ -14,6 +14,7 @@ use O21\CryptoWallets\Models\EthereumTransactionReceipt;
 use O21\CryptoWallets\SmartContracts\Ethereum\Filters\LogsFilter;
 use O21\CryptoWallets\Web3\EthAbi;
 use Web3\Contract;
+use O21\CryptoWallets\Support\Error;
 
 abstract class AbstractSmartContract implements SmartContractInterface
 {
@@ -37,25 +38,19 @@ abstract class AbstractSmartContract implements SmartContractInterface
         $this->setAddress($address);
     }
 
-    public function deploy(
-        DeployParams $params,
-        string &$error = null
-    ): ?EthereumTransactionReceipt {
+    public function deploy(DeployParams $params): ?EthereumTransactionReceipt
+    {
         $this->assertNotDeployed();
 
         $receipt = null;
 
         $deployParams = $params->toArray();
-        $deployParams[] = function ($err, $hash) use (&$receipt, &$error) {
-            if ($err && ! $hash) {
-                $error = $err->getMessage();
-                return;
-            }
+        $deployParams[] = function ($err, $hash) use (&$receipt) {
+            Error::assertEmpty($err);
 
             $receipt = $this->wallet->getTransactionReceipt($hash);
             if (! $receipt) {
-                $error = "Can't get transaction receipt for created contract.";
-                return;
+                throw SmartContractNotDeployedException::noReceipt();
             }
 
             $this->setAddress($receipt->contractAddress);
@@ -123,9 +118,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
             $params,
             $call,
             function ($err, ...$args) use (&$result) {
-                if ($err !== null) {
-                    throw $err;
-                }
+                Error::assertEmpty($err);
 
                 $result = $args;
             }
@@ -138,8 +131,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
     public function send(
         string $method,
         array $params = [],
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string {
         $this->assertDeployed();
 
@@ -149,8 +141,9 @@ abstract class AbstractSmartContract implements SmartContractInterface
             $method,
             $params,
             $this->assertEthereumCallFromDefined($call),
-            function ($err, $txid) use (&$error, &$hash) {
-                $error = $err;
+            function ($err, $txid) use (&$hash) {
+                Error::assertEmpty($err);
+
                 $hash = $txid;
             }
         );
@@ -162,8 +155,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
     public function estimateGas(
         string $method,
         array $params = [],
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string {
         $this->assertDeployed();
 
@@ -173,8 +165,8 @@ abstract class AbstractSmartContract implements SmartContractInterface
             $method,
             $params,
             $this->assertEthereumCallFromDefined($call),
-            function ($err, $_gas) use (&$error, &$gas) {
-                $error = $err;
+            function ($err, $_gas) use (&$gas) {
+                Error::assertEmpty($err);
                 $gas = $_gas;
             }
         );
@@ -194,9 +186,7 @@ abstract class AbstractSmartContract implements SmartContractInterface
         }
 
         $callback ??= static function ($err) {
-            if ($err !== null) {
-                throw $err;
-            }
+            Error::assertEmpty($err);
         };
 
         return [

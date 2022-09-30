@@ -98,15 +98,14 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
                 $from,
                 $to,
                 $value,
-                $call,
-                $error
+                $call
             );
         } else {
-            $hash = $this->contract->transfer($to, $value, $call, $error);
+            $hash = $this->contract->transfer($to, $value, $call);
         }
 
         if (! $hash) {
-            throw SendException::withError($error);
+            throw SendException::withError('Something went wrong');
         }
 
         return $hash;

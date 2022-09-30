@@ -11,10 +11,7 @@ interface SmartContractInterface
 {
     public function __construct(EthereumWalletInterface $wallet);
 
-    public function deploy(
-        DeployParams $params,
-        string &$error = null
-    ): ?EthereumTransactionReceipt;
+    public function deploy(DeployParams $params): ?EthereumTransactionReceipt;
 
     public function decodeData(string $data, array $topics): array;
 
@@ -38,14 +35,12 @@ interface SmartContractInterface
         string $method,
         array $params,
         ?EthereumCall $call = null,
-        ?string &$error = null
     ): ?string;
 
     public function estimateGas(
         string $method,
         array $params,
         ?EthereumCall $call = null,
-        ?string &$error = null
     ): ?string;
 
     public static function getAbi(): array;

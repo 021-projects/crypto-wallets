@@ -43,20 +43,17 @@ abstract class AbstractERC20SmartContract extends AbstractSmartContract implemen
      * @param  string  $to
      * @param  string|int  $amount  in wei
      * @param  \O21\CryptoWallets\Models\EthereumCall|null  $call
-     * @param  string|null  $error
      * @return string|null
      */
     public function transfer(
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string {
         return $this->send(
             'transfer',
             [$to, (int)$amount],
-            $call,
-            $error
+            $call
         );
     }
 
@@ -65,21 +62,18 @@ abstract class AbstractERC20SmartContract extends AbstractSmartContract implemen
      * @param  string  $to
      * @param  string|int  $amount  in wei
      * @param  \O21\CryptoWallets\Models\EthereumCall|null  $call
-     * @param  string|null  $error
      * @return string|null
      */
     public function transferFrom(
         string $from,
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string {
         return $this->send(
             'transferFrom',
             [$from, $to, (int)$amount],
-            $call,
-            $error
+            $call
         );
     }
 
@@ -88,21 +82,18 @@ abstract class AbstractERC20SmartContract extends AbstractSmartContract implemen
      * @param  string  $to
      * @param  string|int  $amount  in wei
      * @param  \O21\CryptoWallets\Models\EthereumCall|null  $call
-     * @param  string|null  $error
      * @return string|null
      */
     public function estimateTransferFromGas(
         string $from,
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
+        ?EthereumCall $call = null
     ): ?string {
         return $this->estimateGas(
             'transferFrom',
             [$from, $to, (int)$amount],
-            $call,
-            $error
+            $call
         );
     }
 
@@ -110,21 +101,17 @@ abstract class AbstractERC20SmartContract extends AbstractSmartContract implemen
      * @param  string  $to
      * @param  string|int  $amount  in wei
      * @param  \O21\CryptoWallets\Models\EthereumCall|null  $call
-     * @param  string|null  $error
      * @return string|null
      */
     public function estimateTransferGas(
         string $to,
         string|int $amount,
-        ?EthereumCall $call = null,
-        ?string &$error = null
-    ): ?string
-    {
+        ?EthereumCall $call = null
+    ): ?string {
         return $this->estimateGas(
             'transfer',
             [$to, (int)$amount],
-            $call,
-            $error
+            $call
         );
     }
 }
