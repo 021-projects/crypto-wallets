@@ -117,23 +117,26 @@ class EthereumWallet extends AbstractWallet implements WalletInterface, Ethereum
     /**
      * @param  string  $to
      * @param  string  $value  Transaction amount in Wei
-     * @param  \O21\CryptoWallets\Interfaces\FeeInterface|string  $fee  Tip for miners in Wei
+     * @param  \O21\CryptoWallets\Interfaces\FeeInterface|string|null  $fee  Tip for miners in Wei
      * @param  string|null  $from  From which account to send.
      * @return string
      */
     public function send(
         string $to,
         string $value,
-        FeeInterface|string $fee,
+        FeeInterface|string|null $fee = null,
         ?string $from = null
     ): string {
         $call = new EthereumCall(
             from                : $from ?? $this->getCoinbase(),
             to                  : $to,
-            maxPriorityFeePerGas: Fee::getValue($fee),
-            maxFeePerGas        : $this->estimateSendingFee($to, $value, $fee),
             value               : $value
         );
+
+        if ($fee) {
+            $call->maxPriorityFeePerGas = Fee::getValue($fee);
+            $call->maxFeePerGas = $this->estimateSendingFee($to, $value, $fee);
+        }
 
         return $this->ethCall('sendTransaction', [$call->toArray()]);
     }

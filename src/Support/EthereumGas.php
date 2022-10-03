@@ -21,7 +21,7 @@ class EthereumGas
     ): string {
         return bcmul(
             (string)$gas,
-            bcadd(Fee::getValue($fee), bcmul('2', (string)$baseFee))
+            bcadd(Fee::getValue($fee), (string)$baseFee)
         );
     }
 }

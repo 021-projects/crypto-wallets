@@ -89,7 +89,7 @@ abstract class AbstractERC20Wallet extends EthereumWallet implements IERC20Walle
     public function send(
         string $to,
         string $value,
-        string|FeeInterface $fee,
+        string|FeeInterface|null $fee = null,
         ?string $from = null
     ): string {
         $call = $this->getFeeEthCall($to, $value, $fee);
