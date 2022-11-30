@@ -10,7 +10,9 @@ class BitcoindFee extends AbstractFee
         protected float|string $value,
         protected int $approximateConfirmationTime,
         protected int $blocks = 10
-    ) {}
+    ) {
+        $this->value = crypto_number($value);
+    }
 
     public function toArray(): array
     {
