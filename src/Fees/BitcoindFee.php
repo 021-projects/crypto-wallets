@@ -25,11 +25,11 @@ class BitcoindFee extends AbstractFee
 
     public function getValue(Bitcoind $unit = Bitcoind::KByte): string
     {
-        return match ($unit) {
+        return crypto_number(match ($unit) {
             Bitcoind::KByte   => $this->value,
             Bitcoind::Byte    => bcdiv($this->value, $unit->value, 11),
             Bitcoind::Satoshi => bcmul($this->getValue(Bitcoind::Byte), $unit->value, 11)
-        };
+        });
     }
 
     /**
