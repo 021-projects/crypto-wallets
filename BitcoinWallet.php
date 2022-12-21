@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use O21\CryptoWallets\Estimates\Fee;
 use O21\CryptoWallets\Rates\Binance;
 use O21\CryptoWallets\Rates\Bitcoin\Blockchain;
+use O21\CryptoWallets\Rates\CoinGeckoProvider;
 
 class BitcoinWallet extends BitcoindWallet
 {
@@ -45,6 +46,9 @@ class BitcoinWallet extends BitcoindWallet
 
             case WalletRate::RATE_BLOCKCHAIN:
                 return new Blockchain;
+
+            case WalletRate::RATE_COINGECKO:
+                return new CoinGeckoProvider;
         }
     }
 

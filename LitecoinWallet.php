@@ -6,6 +6,8 @@ use O21\CryptoWallets\Contracts\WalletRate;
 use O21\CryptoWallets\Estimates\Fee;
 use Illuminate\Support\Collection;
 use O21\CryptoWallets\Rates\Binance;
+use O21\CryptoWallets\Rates\Bitcoin\Blockchain;
+use O21\CryptoWallets\Rates\CoinGeckoProvider;
 
 class LitecoinWallet extends BitcoindWallet
 {
@@ -37,7 +39,14 @@ class LitecoinWallet extends BitcoindWallet
 
     protected function getWalletRate(?string $source = null): WalletRate
     {
-        return new Binance;
+        switch ($source) {
+            default:
+            case WalletRate::RATE_BINANCE:
+                return new Binance;
+
+            case WalletRate::RATE_COINGECKO:
+                return new CoinGeckoProvider;
+        }
     }
 
     public function getTypicalTransactionSize(): int

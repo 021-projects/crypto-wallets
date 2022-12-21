@@ -10,6 +10,7 @@ interface WalletRate
 
     public const RATE_BINANCE = 'binance';
     public const RATE_BLOCKCHAIN = 'blockchain';
+    public const RATE_COINGECKO = 'coingecko';
 
     /**
      * Checks history support.
