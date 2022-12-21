@@ -22,7 +22,8 @@
         "guzzlehttp/guzzle": "^7.4",
         "jaggedsoft/php-binance-api": "^0.5.28",
         "021/support": "^1.0",
-        "denpa/php-bitcoinrpc": "^2.1"
+        "denpa/php-bitcoinrpc": "^2.1",
+        "ext-json": "*"
     },
     "require-dev": {
         "symfony/var-dumper": "^5.4"

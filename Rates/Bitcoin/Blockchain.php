@@ -2,7 +2,7 @@
 
 namespace O21\CryptoWallets\Rates\Bitcoin;
 
-use GuzzleHttp\Utils;
+use O21\CryptoWallets\Utils;
 use O21\CryptoWallets\Rates\Concerns\HasApi;
 use O21\CryptoWallets\Rates\AbstractRate;
 use Illuminate\Support\Arr;
